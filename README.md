@@ -1,3 +1,0 @@
-# CS375-Project-Spring2023
-OOGa BOOGA
-GUNGA GINGA
