@@ -9,7 +9,8 @@ Requirements:<br/>
 &emsp;&emsp;&emsp;	- controllers and main java file <br/>
 &emsp;&emsp;&emsp;	- if packages are used: <br/>
 &emsp;&emsp;&emsp;&emsp;	- mimic package directories <br/>
-&emsp;&emsp;	- Linux Compile with: <br/>
+&emsp;&emsp;	- Linux Compile with (all .java files associated with the project will need to be compiled): <br/>
 &emsp;&emsp;&emsp;	javac --module-path $PATH_TO_FX --add-modules javafx.controls,javafx.fxml Main.java <br/>
 &emsp;&emsp;	- Run with: <br/>
 &emsp;&emsp;&emsp;	java --module-path $PATH_TO_FX --add-modules javafx.controls,javafx.fxml Main <br/>
+
