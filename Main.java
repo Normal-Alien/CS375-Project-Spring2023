@@ -11,6 +11,7 @@ public class Main extends Application {
 		try {
 			Parent root = FXMLLoader.load(getClass().getResource("TestFXML.fxml"));
 			Scene scene = new Scene(root);
+			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setTitle("GUI Test");
 			primaryStage.setScene(scene);
 			primaryStage.show();
