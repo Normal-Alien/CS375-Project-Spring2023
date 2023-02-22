@@ -55,6 +55,7 @@ def join_function():
   
   return jsonify(result.fetchall()), 200
 
+"""
 sql = "DROP TABLE IF EXISTS Students"
 query(sql)
 
@@ -74,3 +75,9 @@ sql = "CREATE TABLE IF NOT EXISTS Declarations (ID INTEGER PRIMARY KEY, StudentI
 query(sql)
 
 app.run(host="127.0.0.1", port=5000, debug=True)
+"""
+def add_entry(entry):
+    sql = "CREATE TABLE IF NOT EXISTS Students (ID INTEGER PRIMARY KEY, Name TEXT, Cost FLOAT, Path TEXT, Sale_Time LIST, Taxable BOOL, Image LIST, Options LIST)"
+    query(sql)
+
+testjson = {'NAME':"Fries", "COST":2.50, "PATH":"grill/grill_entrees", "SALE_TIME":[False,True,True], "TAXABLE":True, "IMAGE":[[0,1][1,0]], "OPTIONS":["Ketchup","Cheese Sauce"]    }
