@@ -77,7 +77,10 @@ query(sql)
 app.run(host="127.0.0.1", port=5000, debug=True)
 """
 def add_entry(entry):
-    sql = "CREATE TABLE IF NOT EXISTS Students (ID INTEGER PRIMARY KEY, Name TEXT, Cost FLOAT, Path TEXT, Sale_Time LIST, Taxable BOOL, Image LIST, Options LIST)"
+    sql = "CREATE TABLE IF NOT EXISTS Entrys (ID INTEGER PRIMARY KEY, Name TEXT, Cost FLOAT, Path TEXT, Sale_Time LIST, Taxable BOOL, Image TEXT, Options LIST)"
+    query(sql)
+    
+    sql = "INSERT INTO Entrys (Name, Cost, Path, Sale_Time, Taxable, Image, Options) VALUES (entry['NAME'], entry['COST'], 2005)"
     query(sql)
 
-testjson = {'NAME':"Fries", "COST":2.50, "PATH":"grill/grill_entrees", "SALE_TIME":[False,True,True], "TAXABLE":True, "IMAGE":[[0,1][1,0]], "OPTIONS":["Ketchup","Cheese Sauce"]    }
+testjson = {'NAME':"Fries", "COST":2.50, "PATH":"grill/grill_entrees", "SALE_TIME":[False,True,True], "TAXABLE":True, "IMAGE":"101010101", "OPTIONS":["Ketchup","Cheese Sauce"]    }
