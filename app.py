@@ -14,10 +14,23 @@ def query_sql(input):
     sql_conn.commit()
     return result
 
-@app.route("/")
+def check_list(arr, item):
+    #how is this not a base python list method?????
+    ret = None
+    for i in range(len(arr)):
+        if arr[i] == item:
+            ret = arr[i]
+    return ret
+
+@app.route("/", methods=['GET'])
 def home_test():
-    print("Hello World")
-    return jsonify("Hello World")
+    type = ["GET", "GET", "GET", "GET", "POST", "GET", "GET", "POST"]
+    methods = ["/methods/mult_by_126/<val>", "/methods/add_one/<val>", "/", "/database/methods/create_db", "/database/methods/add_entry", "/database/methods/check_entry/<name>", "/database/methods/print_db", "/database/methods/modify_entry/<name>"]
+    ret = []
+    for i in range(len(methods)):
+        print(type[i], " : ", methods[i])
+        ret.append(str(type[i]) + ":" + str(methods[i]))
+    return jsonify(ret, "200")
 
 @app.route("/methods/mult_by_126/<val>")
 def mult_by_126(val):
@@ -38,7 +51,7 @@ def create_database():
     f.close()
     return "200"
 
-#{"data": {"name":"example", "cost":"eg_price", "taxable":True}}
+#{"data": {"name":"'example'", "cost":"eg_price", "taxable":"True"}}
 @app.route("/database/methods/add_entry", methods=['POST'])
 def add_entry():
     entry = request.json['data']
@@ -71,6 +84,41 @@ def check_entry(name):
     if not found:
         print("Item not found!")
     return make_response(jsonify(ret), "200")
+
+@app.route("/database/methods/print_db", methods=['GET'])
+def print_db():
+    query = "SELECT * FROM Items"
+    table = query_sql(query).fetchall()
+    return make_response(jsonify(table), "200")
+
+#{"data": {"cost":"6","taxable":"True"}}
+@app.route("/database/methods/modify_entry/<name>", methods=['POST'])
+def modify_entry(name):
+    #fetch item
+    query = "SELECT * FROM Items WHERE Name='" + name + "'"
+    entry = query_sql(query).fetchall()
+
+    #process POST requests
+    input = request.json['data']
+    arr = list(input.keys())
+    if check_list(arr, 'name'):
+        mod_name = input['name']
+    else:
+        mod_name = entry[0][1]
+    if check_list(arr, 'cost'):
+        mod_cost = input['cost']
+    else:
+        mod_cost = entry[0][2]
+    if check_list(arr, 'taxable'):
+        mod_tax = input['taxable']
+    else:
+        mod_tax = entry[0][3]
+    
+    #send UPDATE request to SQL database
+    query = "UPDATE Items SET Name='" + str(mod_name) + "',Cost=" + str(mod_cost) + ",Taxable=" + str(mod_tax) + " WHERE ID=" + str(entry[0][0])
+    query_sql(query)
+
+    return "200"
 
 
 if __name__ == '__main__':
