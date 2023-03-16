@@ -1,12 +1,6 @@
-TRUNCATE TABLE dbo.Order_Items;
-TRUNCATE TABLE dbo.Order_Addons;
-TRUNCATE TABLE dbo.Orders;
-TRUNCATE TABLE dbo.Addon;
-TRUNCATE TABLE dbo.Item;
-TRUNCATE TABLE dbo.Store;
-DROP TABLE dbo.Order_Items;
 DROP TABLE dbo.Order_Addons;
-DROP TABLE dbo.Orders;
+DROP TABLE dbo.Order_Items;
+DROP TABLE dbo.[Order];
 DROP TABLE dbo.Addon;
 DROP TABLE dbo.Item;
 DROP TABLE dbo.Store;

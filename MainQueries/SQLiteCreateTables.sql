@@ -1,51 +1,50 @@
-CREATE TABLE IF NOT EXISTS Store(
-	ID int identity(1,1),
+CREATE TABLE IF NOT EXISTS [Store](
+	id int identity(1,1),
 	name varchar(20),
-	PRIMARY KEY (ID)
+	PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS Item(
-	ID int identity (1,1),
+CREATE TABLE IF NOT EXISTS [Item](
+	id int identity (1,1),
 	Name text,
-	Store_ID int,
+	Store_id int,
 	Picture image,
 	Cost float,
 	Taxable bit,
 	Item_Addons text,
 	Active bit,
-	PRIMARY KEY (ID),
-	FOREIGN KEY (Store_ID) REFERENCES Store(ID)
+	PRIMARY KEY (id),
+	FOREIGN KEY (store_id) REFERENCES Store(id)
 );
 
-CREATE TABLE IF NOT EXISTS Addon(
-	ID int identity(1,1),
-	Store_ID int,
-	Cost float,
-	PRIMARY KEY (ID),
-	FOREIGN KEY (Store_ID) REFERENCES Store(ID)
+CREATE TABLE IF NOT EXISTS [Addon](
+	id int identity(1,1),
+	store_id int,
+	cost float,
+	PRIMARY KEY (id),
+	FOREIGN KEY (store_id) REFERENCES Store(id)
 );
 
-CREATE TABLE IF NOT EXISTS Orders(
-	ID int identity(1,1),
-	Total_Cost float,
-	Subtotal_Cost float,
-	PRIMARY KEY (ID)
+CREATE TABLE IF NOT EXISTS [Order](
+	id int identity(1,1),
+	total_cost float,
+	subtotal_cost float,
+	PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS Order_Items(
-	Item_ID int,
-	Order_ID int,
-	PRIMARY KEY (Item_ID, Order_ID),
-	FOREIGN KEY (Item_ID) REFERENCES Item(ID),
-	FOREIGN KEY (Order_ID) REFERENCES Orders(ID),
+CREATE TABLE IF NOT EXISTS [Order_Items](
+	order_id int,
+	item_id int,
+	PRIMARY KEY (item_id, order_id),
+	FOREIGN KEY (item_id) REFERENCES Item(id),
+	FOREIGN KEY (order_id) REFERENCES [Order](id),
 );
 
-CREATE TABLE IF NOT EXISTS Order_Addons(
-	Order_ID int,
-	Item_ID int,
-	Addon_ID int,
-	PRIMARY KEY (Order_ID, Item_ID, Addon_ID),
-	FOREIGN KEY (Order_ID) REFERENCES Orders(ID),
-	FOREIGN KEY (Item_ID) REFERENCES Item(ID),
-	FOREIGN KEY (Addon_ID) REFERENCES Addon(ID)
+CREATE TABLE IF NOT EXISTS [Order_Addons](
+	order_id int,
+	item_id int,
+	addon_id int,
+	PRIMARY KEY (order_id, item_id, addon_id),
+	FOREIGN KEY (item_id, order_id) REFERENCES Order_Items(item_id, order_id),
+	FOREIGN KEY (addon_id) REFERENCES Addon(id)
 );
