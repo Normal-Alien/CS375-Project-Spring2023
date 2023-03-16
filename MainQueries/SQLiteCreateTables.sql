@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS [Store](
 
 CREATE TABLE IF NOT EXISTS [Item](
 	id int identity (1,1),
-	Name text,
-	Store_id int,
-	Picture image,
-	Cost float,
+	[name] text,
+	store_id int,
+	picture image,
+	cost float,
 	Taxable bit,
-	Item_Addons text,
-	Active bit,
+	item_addons text,
+	active bit,
 	PRIMARY KEY (id),
 	FOREIGN KEY (store_id) REFERENCES Store(id)
 );
