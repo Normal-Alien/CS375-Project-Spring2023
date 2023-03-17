@@ -51,13 +51,10 @@ def create_database():
     f.close()
     return "200"
 
-#{"data": {"variables": "'sql_code_here'"}}
-@app.route("/database/methods/add_table", methods=['POST'])
-def add_table():
-    data = request.json['data']
-    sql = data['']
-    sql_input = "" 
-    query_sql(sql_input)
+
+@app.route("/database/methods/add_table/<code>", methods=['POST'])
+def add_table(code):
+    query_sql(code)
     return "200"
 
 #{"data": {"name":"'example'", "cost":"eg_price", "taxable":"True"}}
@@ -66,6 +63,8 @@ def add_item_entry():
     entry = request.json['data']
     name = entry['name']
     cost = entry['cost']
+    store = entry['store']
+    pic = entry['pic']
     taxable = entry['taxable']
     sql_input = "CREATE TABLE IF NOT EXISTS Items (ID Integer PRIMARY KEY, Name TEXT, Cost INTEGER, Taxable BOOLEAN)"
     query_sql(sql_input)
