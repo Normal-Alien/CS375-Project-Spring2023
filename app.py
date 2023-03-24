@@ -97,7 +97,7 @@ def query_database(code):
     query_sql(code)
     return "200"
 
-#{"data": {"name":"'example'", "cost":"eg_price", "store":"grill", "pic":"(PICTURE STORED AS STRING)", "taxable":"True"}}
+#{"data": {"name":"'example'", "cost":"eg_price", "store":"'grill'", "pic":"'(PICTURE STORED AS STRING)'", "taxable":"True"}}
 @app.route("/database/methods/add_item_entry", methods=['POST'])
 def add_item_entry():
     """
@@ -118,9 +118,9 @@ def add_item_entry():
     store = entry['store']
     pic = entry['pic']
     taxable = entry['taxable']
-    sql_input = "CREATE TABLE IF NOT EXISTS Items (ID Integer PRIMARY KEY, Name TEXT, Cost INTEGER, Store STRING, Pic STRING, Taxable BOOLEAN)"
+    sql_input = "CREATE TABLE IF NOT EXISTS Items (ID Integer PRIMARY KEY, Name TEXT, Cost INTEGER, Store TEXT, Pic TEXT, Taxable BOOLEAN)"
     query_sql(sql_input)
-    sql_input = "INSERT INTO Items (Name, Cost, Taxable) VALUES (" + name + "," + cost + "," + store + "," + pic + "," + taxable + ")"
+    sql_input = "INSERT INTO Items (Name, Cost, Store, Pic, Taxable) VALUES (" + name + "," + cost + "," + store + "," + pic + "," + taxable + ")"
     query_sql(sql_input)
     return "200"
 
@@ -157,7 +157,7 @@ def check_entry(name):
         store.append(table[i][4])
         pic.append(table[i][5])
         if names[i] == name:
-            ret = {"Item Name":names[i],"Item Cost":str(costs[i]),"Taxable":str(taxable[i]),"Store":str(store[i]),"Picture":str(pic[i])}
+            ret = {"Item Name":names[i],"Item Cost":str(costs[i]),"Store":str(store[i]),"Pic":str(pic[i]),"Taxable":str(taxable[i])}
             found = True
     if not found:
         print("Item not found!")
@@ -223,7 +223,7 @@ def modify_entry(name):
         mod_pic = entry[0][5]
 
     #send UPDATE request to SQL database
-    query = "UPDATE Items SET Name='" + str(mod_name) + "',Cost=" + str(mod_cost) + ",Taxable=" + str(mod_tax) + ",Store=" + str(mod_store) + ",Picture=" + str(mod_pic) + " WHERE ID=" + str(entry[0][0])
+    query = "UPDATE Items SET Name='" + str(mod_name) + "',Cost=" + str(mod_cost) + ",Store=" + str(mod_store) + ",Pic=" + str(mod_pic) + ",Taxable=" + str(mod_tax) + " WHERE ID=" + str(entry[0][0])
     query_sql(query)
     return "200"
 
