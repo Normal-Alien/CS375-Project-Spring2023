@@ -1,6 +1,7 @@
 import time
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
+from Item_Entry import *
 
 app = Flask(__name__)
 
@@ -71,7 +72,7 @@ def home_test():
         ret.append(str(type[i]) + ":" + str(methods[i]))
     return jsonify(ret, "200")
 
-@app.route("/database/methods/create_db")
+@app.route("/database/methods/create_db", methods=['GET'])
 def create_database():
     """
     Creates/overwrites the entries.db file.
