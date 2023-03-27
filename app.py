@@ -86,11 +86,14 @@ def create_database():
     f.close()
     return "200"
 
-@app.route("/database/methods/query_database/<code>", methods=['GET'])
+#dev method due to debugging purposes
+@app.route("/database/dev/methods/query_database/<code>", methods=['GET'])
 def query_database(code):
     """
     Queries the database with a given SQL command
-
+    
+    Primarily for debugging purposes
+    
     Return
     ------
     returns an HTTP "200 OK"
@@ -123,6 +126,10 @@ def add_item_entry():
     query_sql(sql_input)
     sql_input = "INSERT INTO Items (Name, Cost, Store, Pic, Taxable) VALUES (" + name + "," + cost + "," + store + "," + pic + "," + taxable + ")"
     query_sql(sql_input)
+    return "200"
+
+@app.route("/database/methods/add_store_entry", methods=['GET'])
+def add_store_entry():
     return "200"
 
 @app.route("/database/methods/check_entry/<name>", methods=['GET'])
