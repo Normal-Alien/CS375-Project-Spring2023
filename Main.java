@@ -10,7 +10,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			//use fxml as resource for root
-			Parent root = FXMLLoader.load(getClass().getResource("TestFXML.fxml"));
+			Parent root = FXMLLoader.load(getClass().getResource("mainMenu.fxml"));
 			Scene scene = new Scene(root);
 			//unsure if this line is needed as the fxml file should load it for us
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
