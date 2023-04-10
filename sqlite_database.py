@@ -2,14 +2,16 @@ import sqlite3
 import json
 
 # database file name must be entered with '.db' file name extension
-# 
 class SqliteDb():
+    
+    #boostrapping for db initialization
     def __init__(self, dbPath):
         self.dbPath = dbPath
 
+    #Perform bootstrapping tasks for the database
     def initDatabase(self):
+        #database script to create database
         createScript = open("MainQueries/SQLiteCreateTables.sql", "r")
-        #remember to close this connection
         conn = sqlite3.connect(self.dbPath)
         cursor = conn.cursor()
 
@@ -22,10 +24,10 @@ class SqliteDb():
         conn.close()
 
     def openConnection(self):
+        conn = sqlite3.connect(self.dbPath)
+        cursor = conn.cursor()
+        #remember to close the database connection
         return conn
-    
-    def closeConnection(self, conn):
-        conn.close()
 
     #queries here must be formed into an array
     def queryDb(self, queryArr):
@@ -43,5 +45,18 @@ class SqliteDb():
         self.queryDb(stmts)
     
     #this assumes that the input data already has the proper amount of data fields in the proper data types
-    def insertEntry(self, table, data)
-        
+    #data should be organized into a python dictionary
+    #like below:
+    #   {"data" :
+    #           "table" : {
+    #               "tblName" : { "tblData" : {}
+    #               },
+    #               "otherTbl" : { "tblData" : {}
+    #               }
+    #           }
+    #   }
+    def insertEntry(self, data):
+       conn = sqlite3.connect(self.dbPath)
+       cursor = conn.cursor()
+
+       cursor.execute("INSERT INTO " + data["data"]["table"] + ";")
