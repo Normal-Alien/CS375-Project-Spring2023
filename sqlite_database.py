@@ -44,19 +44,25 @@ class SqliteDb():
         stmts = ['''Select * from Store;''', '''Select * from Item;''', '''Select * from Addon;''', '''Select * from [Order];''','''Select * from [Order_Items];''' ,'''Select * from [Order_Addons];''']
         self.queryDb(stmts)
     
-    #this assumes that the input data already has the proper amount of data fields in the proper data types
-    #data should be organized into a python dictionary
-    #like below:
-    #   {"data" :
-    #           "table" : {
-    #               "tblName" : { "tblData" : {}
-    #               },
-    #               "otherTbl" : { "tblData" : {}
-    #               }
+    # WARNING: this method assumes that the input data already has the proper amount of data fields in the proper data types
+    # data should be organized into a python dictionary
+    # example below:
+    #           {"table" :  {
+    #                           "tblName" : "name of table"
+    #                           "tblData" : { "entryData", "moreData", "evenMOARDATA" }
+    #                       }
     #           }
-    #   }
+    # only single entries to a single table are allowed to be input
     def insertEntry(self, data):
-       conn = sqlite3.connect(self.dbPath)
-       cursor = conn.cursor()
+        conn = sqlite3.connect(self.dbPath)
+        cursor = conn.cursor()
+        execstmt = "INSERT INTO " + data["table"]["tblName"] + "VALUES ( "
+        
+        for item in data["table"]["tblData"]:
+            execstmt += item + ", "
 
-       cursor.execute("INSERT INTO " + data["data"]["table"] + ";")
+        execstmt += ");"
+        cursor.execute(execstmt)
+
+        conn.close()
+
