@@ -55,8 +55,8 @@ class SqliteDb():
     # data should be organized into a python dictionary
     # example below:
     #           {"table" :  {
-    #                           "tblName" : "name of table"
-    #                           "tblData" : { "entryData", "moreData", "evenMOARDATA" }
+    #                           "tblName" : "nameOfTable"
+    #                           "tblData" : [ "entryData", "moreData", "evenMOARDATA"]
     #                       }
     #           }
     # only single entries to a single table are allowed to be input
@@ -69,13 +69,21 @@ class SqliteDb():
         for element in range(len(dataDict["table"]["tblData"])-1):
             execstmt += dataDict["table"]["tblData"][element] + ", "
 
-        #for item in dataDict["table"]["tblData"]:
-        #    execstmt += item + ", "
-
         execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
+        #debug print
         print(execstmt)
         cursor.execute(execstmt)
 
         conn.commit()
         conn.close()
 
+    # this method is to be used if there will be multiple entries added to a single table in the sqlite db
+    # ex of JSON data:
+    #   {"data" { "table1" : {
+    #                           "tblName: "nameOfTable"
+    #                           "tblData: {["entry1Data"],["entry2Data"],["entry3Data"]}
+    #                        }
+    #             "table2" : {"sameFormatAsTable1"}
+    #           }
+    #   }
+    def insertMulEntry()
