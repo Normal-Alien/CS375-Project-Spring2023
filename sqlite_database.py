@@ -12,37 +12,44 @@ class SqliteDb():
     def initDatabase(self):
         #database script to create database
         createScript = open("MainQueries/SQLiteCreateTables.sql", "r")
-        conn = sqlite3.connect(self.dbPath)
+        conn = self.openConnection()
         cursor = conn.cursor()
 
         stmtArr=createScript.read().split(";")
         for stmt in stmtArr:
-            print(stmt + ";")
             cursor.execute(stmt + ";")
 
         createScript.close()
+        conn.commit()
         conn.close()
 
     def openConnection(self):
         conn = sqlite3.connect(self.dbPath)
-        cursor = conn.cursor()
         #remember to close the database connection
         return conn
 
-    #queries here must be formed into an array
+    # This method executes queries
+    # queries here must be formed into an array or list
+    # ex.
+    # query = ["query1", "query2"]
     def queryDb(self, queryArr):
-        conn = sqlite3.connect(self.dbPath)
+        conn = self.openConnection()
         cursor = conn.cursor()
+        cursReturn = []
 
         for stmt in queryArr:
             cursor.execute(stmt)
+            cursReturn.append(cursor.fetchall())
+        
 
+        conn.commit()
         conn.close()
+        return cursReturn
 
-    #prints all data entries from all tables of the database
-    def printDb(self, conn):
-        stmts = ['''Select * from Store;''', '''Select * from Item;''', '''Select * from Addon;''', '''Select * from [Order];''','''Select * from [Order_Items];''' ,'''Select * from [Order_Addons];''']
-        self.queryDb(stmts)
+    # prints all data entries from all tables of the database
+    def printDb(self):
+        stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
+        print(self.queryDb(stmts))
     
     # WARNING: this method assumes that the input data already has the proper amount of data fields in the proper data types
     # data should be organized into a python dictionary
@@ -55,14 +62,20 @@ class SqliteDb():
     # only single entries to a single table are allowed to be input
     def insertEntry(self, data):
         conn = sqlite3.connect(self.dbPath)
+        dataDict = json.loads(data)
         cursor = conn.cursor()
-        execstmt = "INSERT INTO " + data["table"]["tblName"] + "VALUES ( "
-        
-        for item in data["table"]["tblData"]:
-            execstmt += item + ", "
+        execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
 
-        execstmt += ");"
+        for element in range(len(dataDict["table"]["tblData"])-1):
+            execstmt += dataDict["table"]["tblData"][element] + ", "
+
+        #for item in dataDict["table"]["tblData"]:
+        #    execstmt += item + ", "
+
+        execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
+        print(execstmt)
         cursor.execute(execstmt)
 
+        conn.commit()
         conn.close()
 
