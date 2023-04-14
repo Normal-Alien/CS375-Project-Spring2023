@@ -86,4 +86,5 @@ class SqliteDb():
     #             "table2" : {"sameFormatAsTable1"}
     #           }
     #   }
+    # this will use the cursor.executemany() method
     def insertMulEntry()
