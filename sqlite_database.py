@@ -2,46 +2,89 @@ import sqlite3
 import json
 
 # database file name must be entered with '.db' file name extension
-# 
 class SqliteDb():
+    
+    #boostrapping for db initialization
     def __init__(self, dbPath):
         self.dbPath = dbPath
 
+    #Perform bootstrapping tasks for the database
     def initDatabase(self):
+        #database script to create database
         createScript = open("MainQueries/SQLiteCreateTables.sql", "r")
-        #remember to close this connection
-        conn = sqlite3.connect(self.dbPath)
+        conn = self.openConnection()
         cursor = conn.cursor()
 
         stmtArr=createScript.read().split(";")
         for stmt in stmtArr:
-            print(stmt + ";")
             cursor.execute(stmt + ";")
 
         createScript.close()
+        conn.commit()
         conn.close()
 
     def openConnection(self):
-        return conn
-    
-    def closeConnection(self, conn):
-        conn.close()
-
-    #queries here must be formed into an array
-    def queryDb(self, queryArr):
         conn = sqlite3.connect(self.dbPath)
+        #remember to close the database connection
+        return conn
+
+    # This method executes queries
+    # queries here must be formed into an array or list
+    # ex.
+    # query = ["query1", "query2"]
+    def queryDb(self, queryArr):
+        conn = self.openConnection()
         cursor = conn.cursor()
+        cursReturn = []
 
         for stmt in queryArr:
             cursor.execute(stmt)
+            cursReturn.append(cursor.fetchall())
+        
 
+        conn.commit()
+        conn.close()
+        return cursReturn
+
+    # prints all data entries from all tables of the database
+    def printDb(self):
+        stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
+        print(self.queryDb(stmts))
+    
+    # WARNING: this method assumes that the input data already has the proper amount of data fields in the proper data types
+    # data should be organized into a python dictionary
+    # example below:
+    #           {"table" :  {
+    #                           "tblName" : "nameOfTable"
+    #                           "tblData" : [ "entryData", "moreData", "evenMOARDATA"]
+    #                       }
+    #           }
+    # only single entries to a single table are allowed to be input
+    def insertEntry(self, data):
+        conn = sqlite3.connect(self.dbPath)
+        dataDict = json.loads(data)
+        cursor = conn.cursor()
+        execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
+
+        for element in range(len(dataDict["table"]["tblData"])-1):
+            execstmt += dataDict["table"]["tblData"][element] + ", "
+
+        execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
+        #debug print
+        print(execstmt)
+        cursor.execute(execstmt)
+
+        conn.commit()
         conn.close()
 
-    #prints all data entries from all tables of the database
-    def printDb(self, conn):
-        stmts = ['''Select * from Store;''', '''Select * from Item;''', '''Select * from Addon;''', '''Select * from [Order];''','''Select * from [Order_Items];''' ,'''Select * from [Order_Addons];''']
-        self.queryDb(stmts)
-    
-    #this assumes that the input data already has the proper amount of data fields in the proper data types
-    def insertEntry(self, table, data)
-        
+    # this method is to be used if there will be multiple entries added to a single table in the sqlite db
+    # ex of JSON data:
+    #   {"data" { "table1" : {
+    #                           "tblName: "nameOfTable"
+    #                           "tblData: {["entry1Data"],["entry2Data"],["entry3Data"]}
+    #                        }
+    #             "table2" : {"sameFormatAsTable1"}
+    #           }
+    #   }
+    # this will use the cursor.executemany() method
+    def insertMulEntry()
