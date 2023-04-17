@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package fwlk.cookui;
-
+import java.util.*;
 
 /**
  *
@@ -14,11 +14,21 @@ public class FWLKCookui {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        // TODO code application logic here
-        for (int i = 0; i < 5; i++) {
-            System.out.println(i);
-        }
+    ArrayList<Order> remove(ArrayList<Order> orders, int idx){
+        orders.remove(idx);
+        
+        return orders;
     }
+    /*
+    public static void main(String[] args) {
+        ArrayList<Order> orders;
+        System.out.println("Cookui");
+        int idx = 0;
+        boolean cont = true;
+        //Window ui = Window();
+        
+        
+    }
+    */
     
 }
