@@ -5,7 +5,7 @@ from Item_Entry import *
 
 app = Flask(__name__)
 
-def query_sql(input, database="entries.db"):
+def query_sql(input, database="database.db"):
     """
     Queries an SQL database with an inputted command.
     Useful if you don't want to type out these same exact lines everytime
@@ -81,8 +81,15 @@ def create_database():
     ------
     returns an HTTP "200 OK"
     """
-    f = open("entries.db", "w+")
+    f = open("database.db", "w+")
     print('Database Created/Overwritten')
+
+    createScript = open("MainQueries/SQLiteCreateTables.sql", "r")
+    stmtArr=createScript.read().split(";")
+        for stmt in stmtArr:
+            querySQL(stmt + ";")
+
+    createScript.close()
     f.close()
     return "200"
 
@@ -101,7 +108,7 @@ def query_database(code):
     query_sql(code)
     return "200"
 
-#{"data": {"name":"'example'", "cost":"eg_price", "store":"'grill'", "pic":"'(PICTURE STORED AS STRING)'", "taxable":"True"}}
+#{"data": {"name":"'example'", "picture":"pic_as_txt", "cost":"eg_price", "store":"'grill'", "taxable":"True", "", "active":T}}
 @app.route("/database/methods/add_item_entry", methods=['POST'])
 def add_item_entry():
     """
@@ -122,10 +129,8 @@ def add_item_entry():
     store = entry['store']
     pic = entry['pic']
     taxable = entry['taxable']
-    sql_input = "CREATE TABLE IF NOT EXISTS Items (ID Integer PRIMARY KEY, Name TEXT, Cost INTEGER, Store TEXT, Pic TEXT, Taxable BOOLEAN)"
-    query_sql(sql_input)
-    sql_input = "INSERT INTO Items (Name, Cost, Store, Pic, Taxable) VALUES (" + name + "," + cost + "," + store + "," + pic + "," + taxable + ")"
-    query_sql(sql_input)
+    
+
     return "200"
 
 @app.route("/database/methods/add_store_entry", methods=['GET'])

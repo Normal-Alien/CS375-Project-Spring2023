@@ -63,21 +63,6 @@ class SqliteDb():
     #           }
     # only single entries to a single table are allowed to be input
     def insertEntry(self, data):
-        conn = sqlite3.connect(self.dbPath)
-        dataDict = json.loads(data)
-        cursor = conn.cursor()
-        execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
-
-        for element in range(len(dataDict["table"]["tblData"])-1):
-            execstmt += dataDict["table"]["tblData"][element] + ", "
-
-        execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
-        #debug print
-        print(execstmt)
-        cursor.execute(execstmt)
-
-        conn.commit()
-        conn.close()
 
     # this method is to be used if there will be multiple entries added to a single table in the sqlite db
     # ex of JSON data:
