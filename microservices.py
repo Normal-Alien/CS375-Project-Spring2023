@@ -20,13 +20,17 @@ def query_sql(input, database="database.db"):
     ------
     result if the SQL command returns information, it gets returned
     """
-    f = open(database)
-    if not f:
+    try:
+        f = open(database)
+    except:
+        print("Error: file does not exists")
         abort(400) #if database file DNE, abort out
     sql_conn = sqlite3.connect(database)
     curs = sql_conn.cursor()
     result = curs.execute(input)
     sql_conn.commit()
+    sql_conn.close()
+    f.close()
     return result
 
 def check_list(arr, item):
@@ -108,7 +112,7 @@ def query_database(code):
     query_sql(code)
     return "200"
 
-#{"data": {"name":"'example'", "picture":"pic_as_txt", "cost":"eg_price", "store":"'grill'", "taxable":"True", "", "active":T}}
+#{"data": {"name":"'example'", "store":id_num, "picture":"pic_as_txt", "cost":eg_price, "taxable":0or1, "active":0or1}}
 @app.route("/database/methods/add_item_entry", methods=['POST'])
 def add_item_entry():
     """
@@ -125,16 +129,46 @@ def add_item_entry():
     """
     entry = request.json['data']
     name = entry['name']
+    store = entry['store_id']
+    pic = entry['picture']
     cost = entry['cost']
-    store = entry['store']
-    pic = entry['pic']
     taxable = entry['taxable']
-    
+    active = entry['active']
+
+    sql_input = "INSERT INTO Items (name, store, pic, cost, taxable, active) VALUES (" + name + "," + pic + "," + cost + "," + store + "," + taxable + "," + active + ")"
+    query_sql(sql_input)
 
     return "200"
 
 @app.route("/database/methods/add_store_entry", methods=['GET'])
 def add_store_entry():
+    return "200"
+
+'''
+Possible other method for entry input, this method intends to add an entry to any table
+that is input as a JSON object
+JSON form example:
+{"data" :   
+    {"table" :  {
+                    "tblName" : "nameOfTable"
+                    "tblData" : [ "entryData", "moreData", "evenMOARDATA"]
+                }
+    }
+}
+'''
+@app.route("/database/methods/add_entry", methods=['POST']
+def add_entry():
+    dataDict = requests.json["data"]
+    
+    execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
+
+    # loop through elements in JSON data
+    for element in range(len(dataDict["table"]["tblData"])-1):
+        execstmt += dataDict["table"]["tblData"][element] + ", "
+
+    execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
+    query_sql()
+
     return "200"
 
 @app.route("/database/methods/check_entry/<name>", methods=['GET'])
@@ -187,6 +221,22 @@ def print_db():
     Returns the entire database as a json object and an HTTP "200 OK"
     """
     query = "SELECT * FROM Items"
+    
+    '''
+    array with whole db select statements
+    stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
+    '''
+
+    table = query_sql(query).fetchall()
+    return make_response(jsonify(table), "200")
+
+'''
+This method prints the entirety of a database table that is input through the url call
+'''
+@app.route("database/methods/print_table/<table>")
+def print_table(table):
+    query = "SELECT * FROM " + table
+
     table = query_sql(query).fetchall()
     return make_response(jsonify(table), "200")
 

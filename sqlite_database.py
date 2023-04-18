@@ -62,6 +62,7 @@ class SqliteDb():
     #                       }
     #           }
     # only single entries to a single table are allowed to be input
+    # code here to be used in microservices file
     def insertEntry(self, data):
 
     # this method is to be used if there will be multiple entries added to a single table in the sqlite db
