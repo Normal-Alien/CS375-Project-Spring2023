@@ -87,4 +87,5 @@ class SqliteDb():
     #           }
     #   }
     # this will use the cursor.executemany() method
-    def insertMulEntry()
+    def insertMulEntry():
+        pass
