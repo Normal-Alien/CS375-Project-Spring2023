@@ -135,7 +135,7 @@ def add_item_entry():
     taxable = entry['taxable']
     active = entry['active']
 
-    sql_input = "INSERT INTO Items (name, store, pic, cost, taxable, active) VALUES (" + name + "," + pic + "," + cost + "," + store + "," + taxable + "," + active + ")"
+    sql_input = "INSERT INTO Items (name, store, pic, cost, taxable, active) VALUES (" + name + "," + store + "," + pic + "," + cost + "," + taxable + "," + active + ")"
     query_sql(sql_input)
 
     return "200"
@@ -211,6 +211,7 @@ def check_entry(name):
         abort(404)
     return make_response(jsonify(ret), "200")
 
+"""
 @app.route("/database/methods/print_db", methods=['GET'])
 def print_db():
     """
@@ -229,11 +230,12 @@ def print_db():
 
     table = query_sql(query).fetchall()
     return make_response(jsonify(table), "200")
+"""
 
 '''
 This method prints the entirety of a database table that is input through the url call
 '''
-@app.route("database/methods/print_table/<table>")
+@app.route("database/methods/print_table/<table>", methods=['GET'])
 def print_table(table):
     query = "SELECT * FROM " + table
 
