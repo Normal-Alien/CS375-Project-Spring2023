@@ -3,6 +3,13 @@ package client;
 import okhttp3.*;
 import java.io.IOException;
 
+/*
+
+Adapated from:
+https://mkyong.com/java/how-to-send-http-request-getpost-in-java/
+
+*/
+
 public class Client {
 
     private final OkHttpClient httpClient = new OkHttpClient();
