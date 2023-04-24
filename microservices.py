@@ -2,6 +2,7 @@ import time
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
 from Item_Entry import *
+from sqlite_database import SqliteDb
 
 app = Flask(__name__)
 
@@ -88,10 +89,8 @@ def create_database():
     f = open("database.db", "w+")
     print('Database Created/Overwritten')
 
-    createScript = open("MainQueries/SQLiteCreateTables.sql", "r")
-    stmtArr=createScript.read().split(";")
-        for stmt in stmtArr:
-            querySQL(stmt + ";")
+    selfDb = SqliteDb("database.db")
+    selfDb.initDatabase()
 
     createScript.close()
     f.close()
@@ -173,7 +172,7 @@ def add_entry():
 
 @app.route("/database/methods/check_entry/<name>", methods=['GET'])
 def check_entry(name):
-    """
+    '''
     Given an entries name, the SQL database will be checked and the entry
         assosicated with the name will be returned in a json object to the
         requester. If the entry DNE, prints an error and returns an empty
@@ -186,7 +185,7 @@ def check_entry(name):
     Return
     ------
     Returns a json object containing the entries information and an HTTP "200 OK" 
-    """
+    '''
     query = "SELECT * FROM Items"
     table = query_sql(query).fetchall()
     #ids = index+1
@@ -211,26 +210,23 @@ def check_entry(name):
         abort(404)
     return make_response(jsonify(ret), "200")
 
-"""
+
 @app.route("/database/methods/print_db", methods=['GET'])
 def print_db():
-    """
+    '''
     Prints the entire SQL database
 
     Return
     ------
     Returns the entire database as a json object and an HTTP "200 OK"
-    """
+    '''
     query = "SELECT * FROM Items"
     
-    '''
     array with whole db select statements
     stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
-    '''
 
     table = query_sql(query).fetchall()
     return make_response(jsonify(table), "200")
-"""
 
 '''
 This method prints the entirety of a database table that is input through the url call
@@ -245,7 +241,7 @@ def print_table(table):
 #{"data": {"cost":"6","taxable":"True"}}
 @app.route("/database/methods/modify_entry/<name>", methods=['POST'])
 def modify_entry(name):
-    """
+    '''
     Modifies an entry in the SQL database based on the given name
         and by the POST information. Not all parameters in the object
         need be modified.
@@ -258,7 +254,7 @@ def modify_entry(name):
     Return
     ------
     Returns an HTTP "200 OK"
-    """
+    '''
     #fetch item
     query = "SELECT * FROM Items WHERE Name='" + name + "'"
     entry = query_sql(query).fetchall()
