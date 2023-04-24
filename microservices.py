@@ -2,11 +2,8 @@ import time
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
 from Item_Entry import *
-<<<<<<< HEAD
 from sqlite_database import SqliteDb
-=======
 from waitress import serve
->>>>>>> aa2bb32fe3dc8e734278f26c9613bfdf4385bab1
 
 app = Flask(__name__)
 
@@ -34,7 +31,6 @@ def query_sql(input, database="database.db"):
     curs = sql_conn.cursor()
     result = curs.execute(input)
     sql_conn.commit()
-    sql_conn.close()
     f.close()
     return result
 
@@ -95,8 +91,7 @@ def create_database():
 
     selfDb = SqliteDb("database.db")
     selfDb.initDatabase()
-
-    createScript.close()
+    
     f.close()
     return "200"
 
@@ -113,6 +108,29 @@ def query_database(code):
     returns an HTTP "200 OK"
     """
     query_sql(code)
+    return "200"
+
+@app.route("/database/methods/fetch_active_orders", methods=['GET'])
+def fetch_active_orders():
+    code = "SELECT * FROM Orders WHERE active = True"
+    ret = query_sql(code).fetchall()
+    return make_response(jsonify(ret), "200")
+
+"""
+expects:
+{"data":
+    {
+    "ID":"12345"
+    }
+}
+#we dont really need the entire orders information to set it as inactive, just its key
+"""
+@app.route("/database/methods/rm_order", methods=['POST'])
+def rm_order():
+    entry = request.json['data']
+    print(entry.get("ID"))
+    query = "UPDATE Orders SET active=False WHERE ID=" + str(entry.get("ID"))
+    query_sql(query)
     return "200"
 
 #{"data": {"name":"'example'", "store":id_num, "picture":"pic_as_txt", "cost":eg_price, "taxable":0or1, "active":0or1}}
@@ -147,7 +165,7 @@ def add_item_entry():
 def add_store_entry():
     return "200"
 
-'''
+"""
 Possible other method for entry input, this method intends to add an entry to any table
 that is input as a JSON object
 JSON form example:
@@ -158,19 +176,21 @@ JSON form example:
                 }
     }
 }
-'''
-@app.route("/database/methods/add_entry", methods=['POST']
+"""
+@app.route("/database/methods/add_entry", methods=['POST'])
 def add_entry():
-    dataDict = requests.json["data"]
+    dataDict = request.json["data"]
     
     execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
 
     # loop through elements in JSON data
-    for element in range(len(dataDict["table"]["tblData"])-1):
-        execstmt += dataDict["table"]["tblData"][element] + ", "
-
-    execstmt += dataDict["table"]["tblData"][len(dataDict["table"]["tblData"])-1] + ");"
-    query_sql()
+    for i in range(len(dataDict["table"]["tblData"])):
+        execstmt += dataDict["table"]["tblData"][i]
+        if i < len(dataDict["table"]["tblData"]) - 1:
+            execstmt += ", "
+    execstmt += ");"
+    print(execstmt)
+    query_sql(execstmt)
 
     return "200"
 
@@ -224,10 +244,10 @@ def print_db():
     ------
     Returns the entire database as a json object and an HTTP "200 OK"
     '''
-    query = "SELECT * FROM Items"
+    query = "SELECT * FROM Item"
     
-    array with whole db select statements
-    stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
+    #array with whole db select statements
+    stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
 
     table = query_sql(query).fetchall()
     return make_response(jsonify(table), "200")
@@ -235,7 +255,7 @@ def print_db():
 '''
 This method prints the entirety of a database table that is input through the url call
 '''
-@app.route("database/methods/print_table/<table>", methods=['GET'])
+@app.route("/database/methods/print_table/<table>", methods=['GET'])
 def print_table(table):
     query = "SELECT * FROM " + table
 

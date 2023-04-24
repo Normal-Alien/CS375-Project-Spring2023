@@ -46,7 +46,7 @@ class SqliteDb():
 
     # prints all data entries from all tables of the database
     def printDb(self):
-        stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
+        stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
         print(self.queryDb(stmts))
 
     def clearDb(self):

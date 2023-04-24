@@ -22,10 +22,11 @@ CREATE TABLE IF NOT EXISTS [Addon](
 	PRIMARY KEY (id),
 	FOREIGN KEY (store_id) REFERENCES Store(id)
 );
-CREATE TABLE IF NOT EXISTS [Order](
+CREATE TABLE IF NOT EXISTS [Orders](
 	id int identity(1,1),
 	total_cost float,
 	subtotal_cost float,
+	active bit,
 	PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS [Order_Items](
