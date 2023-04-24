@@ -4,7 +4,9 @@ import json
 #example options: "/database/methods/add_entry"
 #example json: "{"data":{"name":"'burrito_bowl'", "cost":"7", "taxable":"True"}}"
 
-host = "http://localhost:5000"
+ip = input("Please enter the IP to connect to: ")
+port = input("Please enter the port of the IP: ")
+host = "http://" + ip + ":" + port
 rest = input("Please enter the url options: ")
 url = host + rest
 post = input("What type of request is this? (POST/GET) ")
