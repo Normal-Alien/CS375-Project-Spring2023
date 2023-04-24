@@ -1,7 +1,10 @@
 from item_class import * #Item entry, addon, and order classes
+import requests
+import json
 
 STORE_IPS = {"tres":"256.256.256.256", "grill":"255.255.255.255", "example":"localhost"}
 PORT = 4126
+connect = "http://localhost:5000"
 
 class menu:
     def __init__(items):
@@ -59,6 +62,7 @@ def send_order(order):
     order.jsonify()
     #connect to the appropriate store(s)
     for store in stores:
+        response = requests.post(connect, data = None, json = order)
         pass #connect to each store 1-by-1 to send order to all needed
     
     #catch acknowledgements from each store
