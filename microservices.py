@@ -2,6 +2,7 @@ import time
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
 from Item_Entry import *
+from waitress import serve
 
 app = Flask(__name__)
 
@@ -237,4 +238,5 @@ def modify_entry(name):
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000)
+    #app.run(host='172.25.36.95', port=5000)
+    serve(app, host='0.0.0.0', port=5000)
