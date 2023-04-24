@@ -48,6 +48,9 @@ class SqliteDb():
     def printDb(self):
         stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM [Order];","SELECT * FROM [Order_Items];" ,"SELECT * FROM [Order_Addons];"]
         print(self.queryDb(stmts))
+
+    def clearDb(self):
+        return
     
     # Method may not be in the final project
     # WARNING: this method assumes that the input data already has the proper amount of data fields 
