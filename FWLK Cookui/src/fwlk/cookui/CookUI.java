@@ -47,6 +47,7 @@ public class CookUI extends Application {
             //System.out.println("yes");
             //MenuNav controller = new MenuNav();
             launch(args);
+            
 	}
         
 }
