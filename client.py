@@ -1,9 +1,6 @@
 import requests
 import json
 
-#example options: "/database/methods/add_entry"
-#example json: "{"data":{"name":"'burrito_bowl'", "cost":"7", "taxable":"True"}}"
-
 ip = input("Please enter the IP to connect to: ")
 port = input("Please enter the port of the IP: ")
 host = "http://" + ip + ":" + port

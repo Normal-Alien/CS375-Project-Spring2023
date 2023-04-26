@@ -8,19 +8,16 @@ from waitress import serve
 app = Flask(__name__)
 
 def query_sql(input, database="database.db"):
-    """
-    Queries an SQL database with an inputted command.
+    """Queries an SQL database with an inputted command.
     Useful if you don't want to type out these same exact lines everytime
         you touch an SQL database
 
-    Parameters
-    ----------
-    input string - command to send to the sql database
-    database string = "entries.db" - is the database to be accesssed; defaults to entries database
+    Args:
+        input (string): command to send to the sql database
+        database (string) = "entries.db": is the database to be accesssed; defaults to entries database
     
-    Return
-    ------
-    result if the SQL command returns information, it gets returned
+    Returns:
+        SQL ret: result if the SQL command returns information, it gets returned
     """
     try:
         f = open(database)
@@ -35,21 +32,18 @@ def query_sql(input, database="database.db"):
     return result
 
 def check_list(arr, item):
-    """
-    Checks if the given item is in the given array. If it is not, return None.
+    """Checks if the given item is in the given array. If it is not, return None.
     Does so by iterating through the loop and setting the return value if an
         array index is found to be equal to the item.
 
     Somehow, this is not a base python list method...
 
-    Parameters
-    ----------
-    arr 1D array - array being checked to see if it contains 'item'
-    item - object of whatever type that will be compared to each index in 'arr'
+    Args:
+        arr (1D array): array being checked to see if it contains 'item'
+        item (???): object of whatever type that will be compared to each index in 'arr'
 
-    Return
-    ------
-    ret if 'item' is in 'arr', it returns the value in 'arr' that's equal to 'item'. otherwise, returns zero
+    Returns:
+        ret (same as 'item'): if 'item' is in 'arr', it returns the value in 'arr' that's equal to 'item'. otherwise, returns zero
     """
     ret = None
     for i in range(len(arr)):
@@ -59,8 +53,7 @@ def check_list(arr, item):
 
 @app.route("/", methods=['GET'])
 def home_test():
-    """
-    Acts as a guide to anyone interested in using the microservices associated with
+    """Acts as a guide to anyone interested in using the microservices associated with
         this file. List has to be updated manually and will give the user a json
         file containing each available method along with what type of microservice
         it is (GET, POST, PUT).
@@ -69,250 +62,159 @@ def home_test():
     ------
     returns a lit of the available microservices and how to access them & a "200 OK" message
     """
-    type = ["GET", "GET", "GET", "POST", "GET", "GET", "POST"]
-    methods = ["/", "/database/methods/create_db", "/database/methods/query_database/<code>", "/database/methods/add_item_entry", "/database/methods/check_entry/<name>", "/database/methods/print_db", "/database/methods/modify_entry/<name>"]
+    print("Function Listing Call")
+    
+    type = ["GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"]
+    methods = ["/", "/database/methods/create_db", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
     ret = []
     for i in range(len(methods)): #makes object that gets sent look nicer
-        print(type[i], " : ", methods[i])
         ret.append(str(type[i]) + ":" + str(methods[i]))
     return jsonify(ret, "200")
 
 @app.route("/database/methods/create_db", methods=['GET'])
-def create_database():
-    """
-    Creates/overwrites the entries.db file.
+def create_db():
+    """Creates/overwrites the database.db file
 
-    Return
-    ------
-    returns an HTTP "200 OK"
+    Returns:
+        http_response: returns an http "OK"
     """
+    print("Database Creation/Overwriting Call")
+    
     f = open("database.db", "w+")
-    print('Database Created/Overwritten')
-
     selfDb = SqliteDb("database.db")
     selfDb.initDatabase()
     
     f.close()
     return "200"
 
-#dev method due to debugging purposes
 @app.route("/database/dev/methods/query_database/<code>", methods=['GET'])
 def query_database(code):
     """
-    Queries the database with a given SQL command
+    Queries the database with a given SQL command; primarily for debugging purposes
     
-    Primarily for debugging purposes
-    
-    Return
-    ------
-    returns an HTTP "200 OK"
+    Returns:
+        http_response: returns an http "OK"
     """
+    print("Database Query Call")
+    
     query_sql(code)
     return "200"
 
 @app.route("/database/methods/fetch_active_orders", methods=['GET'])
 def fetch_active_orders():
-    code = "SELECT * FROM Orders WHERE active = True"
-    ret = query_sql(code).fetchall()
+    """Sorts through the orders in the database to gather the active orders
+    and then returns the active orders and their items and addons
+
+    Returns:
+        http_response: json object containing the active orders and their items and addons, and an http "OK"
+    """
+    print("Fetch Active Orders Call")
+    
+    query = "SELECT * FROM Orders WHERE active = True"
+    ret = {}
+    ords = query_sql(query).fetchall()
+    for order in ords:
+        ord_id = order[0] #fetch order ID
+        query = "SELECT * FROM Order_Items WHERE order_id = " + str(ord_id)
+        items = query_sql(query).fetchall() #grab associated items
+        query = "SELECT * FROM Order_Addons WHERE order_id = " + str(ord_id)
+        addons = query_sql(query).fetchall() #grab associated addons
+        ret.update({ord_id:[order,items,addons]}) #pack into dictionary {"ID":[ [order] , [ [item] , [item] , etc ] , [ [ addon ] , [ addon ] , etc ] ] , "ID2":[etc] }
     return make_response(jsonify(ret), "200")
 
-"""
-expects:
-{"data":
-    {
-    "ID":"12345"
-    }
-}
-#we dont really need the entire orders information to set it as inactive, just its key
-"""
-@app.route("/database/methods/rm_order", methods=['POST'])
-def rm_order():
-    entry = request.json['data']
-    print(entry.get("ID"))
-    query = "UPDATE Orders SET active=False WHERE ID=" + str(entry.get("ID"))
+@app.route("/database/methods/rm_order/<ID>", methods=['GET'])
+def rm_order(ID):
+    """Updates an order in the database to be set to inactive (as in the order is complete)
+
+    Returns:
+        http_response: 200 "OK"
+    """
+    print("Deactivate Order Call")
+    
+    query = "UPDATE Orders SET active=False WHERE ID=" + str(ID)
     query_sql(query)
     return "200"
 
-#{"data": {"name":"'example'", "store":id_num, "picture":"pic_as_txt", "cost":eg_price, "taxable":0or1, "active":0or1}}
-@app.route("/database/methods/add_item_entry", methods=['POST'])
-def add_item_entry():
-    """
-    Queries the SQL database with a command to specifically create the 'Items'
-        table if it DNE and then to add the given item json information to the table.
-
-    Parameters
-    ----------
-    POST - takes in a json object containing item entry information to be added to the database
-
-    Return
-    ------
-    returns an HTTP "200 OK"
-    """
-    entry = request.json['data']
-    name = entry['name']
-    store = entry['store_id']
-    pic = entry['picture']
-    cost = entry['cost']
-    taxable = entry['taxable']
-    active = entry['active']
-
-    sql_input = "INSERT INTO Items (name, store, pic, cost, taxable, active) VALUES (" + name + "," + store + "," + pic + "," + cost + "," + taxable + "," + active + ")"
-    query_sql(sql_input)
-
-    return "200"
-
-@app.route("/database/methods/add_store_entry", methods=['GET'])
-def add_store_entry():
-    return "200"
-
-"""
-Possible other method for entry input, this method intends to add an entry to any table
-that is input as a JSON object
-JSON form example:
-{"data" :   
-    {"table" :  {
-                    "tblName" : "nameOfTable"
-                    "tblData" : [ "entryData", "moreData", "evenMOARDATA"]
-                }
+@app.route("/database/methods/add_entries", methods=['POST'])
+def add_entries():
+    """Adds one or more entries to the SQL database based on their information in the json object
+    JSON information should be organized as seen:
+    {"data" :
+        [
+            {"[name of table]":
+                [ "entryData", "moreData", "evenMOARDATA"]
+            },
+            
+            {"[name of second table]":
+                ["data",etc.]
+            },
+            
+            {etc
+                etc
+            }
+        ]
     }
-}
-"""
-@app.route("/database/methods/add_entry", methods=['POST'])
-def add_entry():
-    dataDict = request.json["data"]
-    
-    execstmt = "INSERT INTO " + dataDict["table"]["tblName"] + " VALUES ("
+    Compressed Example:
+    eg: {"data":[{"Item":["0","'example'","1","10101","8.00","True","'[1,2]'","True"]},{"Item":["1","'test'","2","11100","7.50","True","'[0,1]'","True"]}]}
 
-    # loop through elements in JSON data
-    for i in range(len(dataDict["table"]["tblData"])):
-        execstmt += dataDict["table"]["tblData"][i]
-        if i < len(dataDict["table"]["tblData"]) - 1:
-            execstmt += ", "
-    execstmt += ");"
-    print(execstmt)
-    query_sql(execstmt)
+    Returns:
+        http_response: 200 "OK"
+    """
+    print("Add Entries Call")
+    
+    dataDict = request.json["data"]
+    dataDict = list(dataDict)
+    
+    for i in range(len(dataDict)):
+        query = "INSERT INTO " + str(list(dataDict[i].keys())[0]) + " VALUES ("
+
+        arr = dataDict[i].get(list(dataDict[i].keys())[0])
+        # loop through elements in JSON data
+        for i in range(len(arr)):
+            query += arr[i]
+            if i < len(arr) - 1:
+                query += ", "
+        query += ");"
+        query_sql(query)
 
     return "200"
-
-@app.route("/database/methods/check_entry/<name>", methods=['GET'])
-def check_entry(name):
-    '''
-    Given an entries name, the SQL database will be checked and the entry
-        assosicated with the name will be returned in a json object to the
-        requester. If the entry DNE, prints an error and returns an empty
-        json object.
-
-    Parameters
-    ----------
-    name String - the item entry's name that the SQL database will be queried for
-    
-    Return
-    ------
-    Returns a json object containing the entries information and an HTTP "200 OK" 
-    '''
-    query = "SELECT * FROM Items"
-    table = query_sql(query).fetchall()
-    #ids = index+1
-    names = []
-    costs = []
-    taxable = []
-    store = []
-    pic = []
-    found = False
-    ret = None
-    for i in range(len(table)):
-        names.append(table[i][1])
-        costs.append(table[i][2])
-        taxable.append(table[i][3])
-        store.append(table[i][4])
-        pic.append(table[i][5])
-        if names[i] == name:
-            ret = {"Item Name":names[i],"Item Cost":str(costs[i]),"Store":str(store[i]),"Pic":str(pic[i]),"Taxable":str(taxable[i])}
-            found = True
-    if not found:
-        print("Item not found!")
-        abort(404)
-    return make_response(jsonify(ret), "200")
-
 
 @app.route("/database/methods/print_db", methods=['GET'])
 def print_db():
-    '''
-    Prints the entire SQL database
+    """Prints the entire SQL database as a dictionary with each table having its name as its key
 
-    Return
-    ------
-    Returns the entire database as a json object and an HTTP "200 OK"
-    '''
-    query = "SELECT * FROM Item"
+    Returns:
+        http_response: Returns the entire database as a json object (which gets unpacked to a python dictionary) and an HTTP "200 OK"
+    """
+    print("Print Database Call")
+    
+    db = {}
     
     #array with whole db select statements
-    stmts = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
+    queries = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
+    table_names = ["Store","Item","Addon","Orders","Order_Items","Order_Addons"]
+    for i in range(len(queries)):
+        cur_table = query_sql(queries[i]).fetchall()
+        db.update({table_names[i]:cur_table})
+        
+    return make_response(jsonify(db), "200")
 
-    table = query_sql(query).fetchall()
-    return make_response(jsonify(table), "200")
-
-'''
-This method prints the entirety of a database table that is input through the url call
-'''
 @app.route("/database/methods/print_table/<table>", methods=['GET'])
 def print_table(table):
-    query = "SELECT * FROM " + table
+    """Prints a specific table from the SQL database
 
+    Args:
+        table (string): the name of the table to be printed
+
+    Returns:
+        http_response: returns the table as a json object along with an "OK"
+    """
+    print("Print Table Call")
+    
+    query = "SELECT * FROM " + table
     table = query_sql(query).fetchall()
     return make_response(jsonify(table), "200")
-
-#{"data": {"cost":"6","taxable":"True"}}
-@app.route("/database/methods/modify_entry/<name>", methods=['POST'])
-def modify_entry(name):
-    '''
-    Modifies an entry in the SQL database based on the given name
-        and by the POST information. Not all parameters in the object
-        need be modified.
-    
-    Parameters
-    ----------
-    name String - the name of the entry in the SQL database to be modified
-    POST - json object containing the parameters of the entry that are being updated
-
-    Return
-    ------
-    Returns an HTTP "200 OK"
-    '''
-    #fetch item
-    query = "SELECT * FROM Items WHERE Name='" + name + "'"
-    entry = query_sql(query).fetchall()
-
-    #process POST requests
-    input = request.json['data']
-    arr = list(input.keys())
-    if check_list(arr, 'name'):
-        mod_name = input['name']
-    else:
-        mod_name = entry[0][1]
-    if check_list(arr, 'cost'):
-        mod_cost = input['cost']
-    else:
-        mod_cost = entry[0][2]
-    if check_list(arr, 'taxable'): #only the most beautiful of code
-        mod_tax = input['taxable']
-    else:
-        mod_tax = entry[0][3]
-    if check_list(arr, 'store'):
-        mod_store = input['store']
-    else:
-        mod_store = entry[0][4]
-    if check_list(arr,'pic'):
-        mod_pic = input['pic']
-    else: 
-        mod_pic = entry[0][5]
-
-    #send UPDATE request to SQL database
-    query = "UPDATE Items SET Name='" + str(mod_name) + "',Cost=" + str(mod_cost) + ",Store=" + str(mod_store) + ",Pic=" + str(mod_pic) + ",Taxable=" + str(mod_tax) + " WHERE ID=" + str(entry[0][0])
-    query_sql(query)
-    return "200"
 
 
 if __name__ == '__main__':
-    #app.run(host='172.25.36.95', port=5000)
     serve(app, host='0.0.0.0', port=5000)
