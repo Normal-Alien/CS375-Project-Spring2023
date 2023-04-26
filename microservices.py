@@ -64,7 +64,7 @@ def home_test():
     """
     print("Function Listing Call")
     
-    type = ["GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"]
+    type = ["GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"] #parallel to methods
     methods = ["/", "/database/methods/create_db", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
     ret = []
     for i in range(len(methods)): #makes object that gets sent look nicer
@@ -142,7 +142,7 @@ def add_entries():
     {"data" :
         [
             {"[name of table]":
-                [ "entryData", "moreData", "evenMOARDATA"]
+                [ "row 1 data", "row 2 data", "row etc data"]
             },
             
             {"[name of second table]":
@@ -165,11 +165,12 @@ def add_entries():
     dataDict = request.json["data"]
     dataDict = list(dataDict)
     
+    #loop through each table
     for i in range(len(dataDict)):
         query = "INSERT INTO " + str(list(dataDict[i].keys())[0]) + " VALUES ("
 
         arr = dataDict[i].get(list(dataDict[i].keys())[0])
-        # loop through elements in JSON data
+        #loop through each table's data entries
         for i in range(len(arr)):
             query += arr[i]
             if i < len(arr) - 1:
@@ -192,7 +193,7 @@ def print_db():
     
     #array with whole db select statements
     queries = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
-    table_names = ["Store","Item","Addon","Orders","Order_Items","Order_Addons"]
+    table_names = ["Store","Item","Addon","Orders","Order_Items","Order_Addons"] #parallel to queries
     for i in range(len(queries)):
         cur_table = query_sql(queries[i]).fetchall()
         db.update({table_names[i]:cur_table})
