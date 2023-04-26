@@ -8,6 +8,8 @@ import java.io.IOException;
 Adapated from:
 https://mkyong.com/java/how-to-send-http-request-getpost-in-java/
 
+Actual testing file can be found in '/java_microservice_integration/src/microserviceintegrationtest/MicroserviceIntegrationTest.java'
+
 */
 
 public class Client {
