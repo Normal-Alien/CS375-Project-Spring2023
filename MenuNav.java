@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class MenuNav {
     private String ip = "";
-    private Client client = new Client();
+    private ClientCook client = new ClientCook();
     private Stage stage;
 	private Scene scene;
 	private Parent root; 
