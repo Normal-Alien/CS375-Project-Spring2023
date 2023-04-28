@@ -1,9 +1,12 @@
 import time
+from datetime import datetime
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
 from Item_Entry import *
 from sqlite_database import SqliteDb
 from waitress import serve
+import shutil
+import os
 
 app = Flask(__name__)
 
@@ -64,8 +67,8 @@ def home_test():
     """
     print("Function Listing Call")
     
-    type = ["GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"] #parallel to methods
-    methods = ["/", "/database/methods/create_db", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
+    type = ["GET", "GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"] #parallel to methods
+    methods = ["/", "/database/methods/create_db", "/database/methods/dump_db", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
     ret = []
     for i in range(len(methods)): #makes object that gets sent look nicer
         ret.append(str(type[i]) + ":" + str(methods[i]))
@@ -86,6 +89,29 @@ def create_db():
     
     f.close()
     return "200"
+
+@app.route("/database/methods/dump_db", methods=['GET'])
+def dump_db():
+    """Makes a copy of the current database and empties it
+
+    Returns:
+        http response: returns a copy of the current database and an http "OK"
+    """
+    response = print_db()
+    today = datetime.now()
+    today = str(today)
+    renam = "database-" + today + ".db"
+    shutil.copy('database.db',renam)
+    query = "DROP TABLE Orders; DROP TABLE Order_Items; DROP TABLE Order_Addons;"
+    f = open("MainQueries/SQLiteCreateTables.sql", "r")
+    content = f.readlines()
+    query += content[24:46]
+    print(query.strip())
+    queries = query.split(';')
+    for quer in queries:
+        query_sql(quer)
+    f.close()
+    return response
 
 @app.route("/database/dev/methods/query_database/<code>", methods=['GET'])
 def query_database(code):
@@ -110,16 +136,9 @@ def fetch_active_orders():
     """
     print("Fetch Active Orders Call")
     
-    query = "SELECT * FROM Orders WHERE active = True"
+    query = ""
     ret = {}
-    ords = query_sql(query).fetchall()
-    for order in ords:
-        ord_id = order[0] #fetch order ID
-        query = "SELECT * FROM Order_Items WHERE order_id = " + str(ord_id)
-        items = query_sql(query).fetchall() #grab associated items
-        query = "SELECT * FROM Order_Addons WHERE order_id = " + str(ord_id)
-        addons = query_sql(query).fetchall() #grab associated addons
-        ret.update({ord_id:[order,items,addons]}) #pack into dictionary {"ID":[ [order] , [ [item] , [item] , etc ] , [ [ addon ] , [ addon ] , etc ] ] , "ID2":[etc] }
+
     return make_response(jsonify(ret), "200")
 
 @app.route("/database/methods/rm_order/<ID>", methods=['GET'])
