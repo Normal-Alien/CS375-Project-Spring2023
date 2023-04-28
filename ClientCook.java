@@ -18,12 +18,12 @@ Actual testing file can be found in '/java_microservice_integration/src/microser
 
 */
 
-public class Client {
+public class ClientCook {
 
     private final OkHttpClient httpClient = new OkHttpClient();
 
     public Response sendRequest(String url, String json, String command) {
-        Client obj = new Client();
+        ClientCook obj = new ClientCook();
         if(!(command.equals("POST"))|!(command.equals("GET"))) {
             System.out.println("command must be either 'POST' or 'GET'");
         } else {
