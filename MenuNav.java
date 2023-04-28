@@ -21,7 +21,8 @@ import java.util.*;
  * @author breeze
  */
 public class MenuNav {
-    private String ip = "";
+    private Boolean isLive = true;
+    private String ip = "172.25.37.136:5000";
     private ClientCook client = new ClientCook();
     private Stage stage;
 	private Scene scene;
@@ -43,49 +44,84 @@ public class MenuNav {
             System.out.println(id);
             orderBox.getChildren().remove(source);
             //likely need to change url
-            String cmdURL = "http://172.25.36.95:5000/database/methods/rm_order/" + id;
-            try(Response response = (Response) client.sendRequest(cmdURL, "", "GET")) {  
-            if(!(response.isSuccessful())) throw new IOException("Request failure.\nFailed code: " + response);
-                System.out.println(response.body().string());
-                return;
+            if(isLive){
+                
+               String ret = removeOrder(id);
+                
             }
         }
+        private String removeOrder(String id){
+            String ret = "empty";
+            try{
+                String cmdURL = "http://" + ip + "/database/methods/rm_order/" + id;
+                ret = client.sendRequest(cmdURL, "", "GET");
+            }
+            catch(Exception e){
+                System.out.println(e);
+            }
+            return ret;
+        }
+	private String getOrders(){
+            String ret = "empty";
+            try{
+                String cmdURL = "http://" + ip + "/database/methods/fetch_active_orders";
+                ret = client.sendRequest(cmdURL, "", "GET");
+            }
+            catch(Exception e){
+                System.out.println(e);
+            }
+            return ret;
+        }
         @FXML
-	
         private void refresh(ActionEvent event) throws IOException{
 		System.out.println("refreshing...");
                 orderBox.getChildren().clear();
-                String cmdURL = "http://172.25.36.95:5000/database/methods/fetch_active_orders";
-                
-                //get list of active orders from the database
-                try(Response response = (Response) client.sendRequest(cmdURL, "", "GET")) {  
-                if(!(response.isSuccessful())) throw new IOException("Request failure.\nFailed code: " + response);
-                    System.out.println(response.body().string());
-                    String data = response.body().string();
-                    Object obj = JSONValue.parse(data);
-                
-                    JSONArray arr = (JSONArray) obj;
-                    Iterator it = arr.iterator();
-                    while(it.hasNext()){
+                if(isLive){
                     
-                        JSONObject curr = (JSONObject) it.next();
-                        String s = (String) curr.get("ID");
-                        //add item details later if able
-                        javafx.scene.control.Button button = new javafx.scene.control.Button(s);
-                    
+
+                    //get list of active orders from the database
+                    String response = getOrders();
+                        System.out.println("tryed a response, got it");
+                        //if(!(response.isSuccessful())) throw new IOException("Request failure.\nFailed code: " + response);
+                        System.out.println("response successful...");
+                        
+                        String data = response;
+                        System.out.println(data);
+                        System.out.print("parsing to obj...");
+                        Object obj = JSONValue.parse(data);
+                        System.out.println("parsed to obj");
+
+                        JSONArray arr = (JSONArray) obj;
+                        System.out.println("toArray");
+                        Iterator it = arr.iterator();
+                        System.out.println("starting iteration");
+                        while(it.hasNext()){
+                            
+                            JSONObject curr = (JSONObject) it.next();
+                            System.out.println(curr);
+                            String s = (String) curr.get("ID");
+                            //add item details later if able
+                            javafx.scene.control.Button button = new javafx.scene.control.Button(s);
+
+                            button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
+                            orderBox.getChildren().add(button);
+                        }
+                    }
+                    /*
+                    catch(Exception e){
+                        System.out.println(e);
+                    }
+                    */
+                
+                
+                else{
+                    //temp dummy buttons
+                    for(int i = 0; i < 10; i++){
+                        javafx.scene.control.Button button = new javafx.scene.control.Button("Button" + i);
                         button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
                         orderBox.getChildren().add(button);
                     }
                 }
-                
-                
-                //temp dummy buttons
-                for(int i = 0; i < 10; i++){
-                            
-                            javafx.scene.control.Button button = new javafx.scene.control.Button("Button" + i);
-                            button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
-                            orderBox.getChildren().add(button);
-                        }
                 /*
                 root = FXMLLoader.load(getClass().getResource("CookuiV0.1.fxml"));
 		
