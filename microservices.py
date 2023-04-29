@@ -136,8 +136,17 @@ def fetch_active_orders():
     """
     print("Fetch Active Orders Call")
     
-    query = ""
+    query = "SELECT * FROM Orders WHERE active = True"
     ret = {}
+    
+    ords = query_sql(query).fetchall()
+    for order in ords:
+        ord_id = order[0] #fetch order ID
+        query = "SELECT * FROM Order_Items WHERE order_id = " + str(ord_id)
+        items = query_sql(query).fetchall() #grab associated items
+        query = "SELECT * FROM Order_Addons WHERE order_id = " + str(ord_id)
+        addons = query_sql(query).fetchall() #grab associated addons
+        ret.update({ord_id:[order,items,addons]}) #pack into dictionary {"ID":[ [order] , [ [item] , [item] , etc ] , [ [ addon ] , [ addon ] , etc ] ] , "ID2":[etc] }
 
     return make_response(jsonify(ret), "200")
 
