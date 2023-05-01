@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import date
 import sqlite3
 from flask import Flask, request, jsonify, abort, make_response
 from Item_Entry import *
@@ -67,8 +67,8 @@ def home_test():
     """
     print("Function Listing Call")
     
-    type = ["GET", "GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"] #parallel to methods
-    methods = ["/", "/database/methods/create_db", "/database/methods/dump_db", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
+    type = ["GET", "GET", "GET", "GET", "GET", "GET", "GET", "POST", "GET", "GET"] #parallel to methods
+    methods = ["/", "/database/methods/create_db", "/database/methods/dump_db", "/database/methods/view_old_orders/<date>", "/database/methods/query_database/<code>", "/database/methods/fetch_active_orders", "/database/methods/rm_order/<ID>", "/database/methods/add_entries", "/database/methods/print_db/", "/database/methods/print_table/<table>"]
     ret = []
     for i in range(len(methods)): #makes object that gets sent look nicer
         ret.append(str(type[i]) + ":" + str(methods[i]))
@@ -98,20 +98,44 @@ def dump_db():
         http response: returns a copy of the current database and an http "OK"
     """
     response = print_db()
-    today = datetime.now()
+    today = date.today()
     today = str(today)
     renam = "database-" + today + ".db"
     shutil.copy('database.db',renam)
     query = "DROP TABLE Orders; DROP TABLE Order_Items; DROP TABLE Order_Addons;"
     f = open("MainQueries/SQLiteCreateTables.sql", "r")
     content = f.readlines()
-    query += content[24:46]
-    print(query.strip())
+    for line in content:
+        query += str(line)
     queries = query.split(';')
     for quer in queries:
         query_sql(quer)
     f.close()
     return response
+
+@app.route("/database/methods/view_old_orders/<date>", methods=['GET'])
+def view_old_orders(date):
+    """Prints a backup/copy of an older database based on the date it was made
+
+    Args:
+        date (string): 'YEAR-MONTH-DAY' format; the date the database was dumped
+
+    Returns:
+        http response: Effectively the same as "print_db" but prints an older database copy rather than the current live database
+    """
+    print("Print Old Database Call")
+    
+    database = "database-" + date + ".db"
+    db = {}
+    
+    #array with whole db select statements
+    queries = ["SELECT * FROM Store;", "SELECT * FROM Item;", "SELECT * FROM Addon;", "SELECT * FROM Orders;","SELECT * FROM Order_Items;" ,"SELECT * FROM Order_Addons;"]
+    table_names = ["Store","Item","Addon","Orders","Order_Items","Order_Addons"] #parallel to queries
+    for i in range(len(queries)):
+        cur_table = query_sql(queries[i], database).fetchall()
+        db.update({table_names[i]:cur_table})
+    
+    return make_response(jsonify(db), "200")
 
 @app.route("/database/dev/methods/query_database/<code>", methods=['GET'])
 def query_database(code):
@@ -246,4 +270,4 @@ def print_table(table):
 
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=5000)
+    serve(app, host='0.0.0.0')
