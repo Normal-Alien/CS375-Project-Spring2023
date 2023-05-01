@@ -18,58 +18,57 @@ Actual testing file can be found in '/java_microservice_integration/src/microser
 
 */
 
-public class Client {
+public class ClientCook {
 
     private final OkHttpClient httpClient = new OkHttpClient();
 
-    public Response sendRequest(String url, String json, String command) {
-        Client obj = new Client();
-        if(!(command.equals("POST"))|!(command.equals("GET"))) {
+    public String sendRequest(String iurl, String json, String command) throws Exception {
+        ClientCook obj = new ClientCook();
+        if(!(command.equals("POST"))&&!(command.equals("GET"))) {
             System.out.println("command must be either 'POST' or 'GET'");
         } else {
-            Response response = null;
             if(command.equals("GET")) {
-                response = obj.sendGet(url); //json not included since GET requests dont use json data blocks
+                String response = obj.sendGet(iurl); //json not included since GET requests dont use json data blocks
+                return response;
             } else if(command.equals("POST")) {
-                response = obj.sendPost(url, json);
+                String response = obj.sendPost(iurl, json);
+                
+                return response;
             }
-            return response;
         }
+        return null;
     }
 
-    private Response sendGet(String url) throws Exception {
+    String sendGet(String iurl) throws Exception {
 
-        Request request = new Request.builder();
-            .url(url)
+        Request request = new Request.Builder()
+            .url(iurl)
             .build();
 
         try(Response response = httpClient.newCall(request).execute()) {
             if(!(response.isSuccessful())) throw new IOException("GET Request failure.\nFailed Code: " + response);
 
-            System.out.println(response.body().string());
-            return response;
-        } 
-                
-                
-        
+            //System.out.println(response.body().string());
+            
+            return response.body().string();
+        }
     }
 
-    private Response sendPost(String url, String json) throws Exception {
+    String sendPost(String url, String json) throws Exception {
 
-        RequestBody formbody = new FormBody.Builder()
-            .add(json)
-            .build();
+        RequestBody body = RequestBody.create(
+            MediaType.parse("application/json"), json);
 
         Request request = new Request.Builder()
             .url(url)
-            .post(formBody)
+            .post(body)
             .build();
 
         try(Response response = httpClient.newCall(request).execute()) {
             if(!(response.isSuccessful())) throw new IOException("POST Request failure.\nFailed code: " + response);
 
-            System.out.println(response.body().string());
-            return response;
+            //System.out.println(response.body().string());
+            return response.body().string();
         }
     }
 }
