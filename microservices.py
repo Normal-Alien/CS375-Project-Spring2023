@@ -10,6 +10,24 @@ import os
 
 app = Flask(__name__)
 
+class Order:
+    def __init__(self, id):
+        self.id = id
+        self.cost = None
+        self.stores = None #array of stores the order accesses
+        self.items = None #array of items the order contains
+        
+class Item:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.addons = None #array of addons the Item has applied
+
+class Addon:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
 def query_sql(input, database="database.db"):
     """Queries an SQL database with an inputted command.
     Useful if you don't want to type out these same exact lines everytime
@@ -154,24 +172,44 @@ def query_database(code):
 def fetch_active_orders():
     """Sorts through the orders in the database to gather the active orders
     and then returns the active orders and their items and addons
+    
+    Final output:
+    {[Order_ID:[
+            ###Stores:[store_id,store_id,etc.] ###probably not gonna be used
+            [Item_ID:
+                Addon_ID:[addon name]
+                Addon_ID_2:[addon name]
+                etc.
+            Item_ID_2:
+                Addon_ID:[addon name]
+                etc.
+            ]
+        ]
+    Order_ID_2:etc.
+    ]}
+    Compressed: {[Order_ID:[Cost:price,Stores:[store_id,store_id,etc.],[Item_ID:[Addon_ID:addon name,Addon_ID_2:addon name,etc.],Item_ID_2:[Addon_ID:addon name],etc.]],Order_ID_2:etc.]}
 
     Returns:
         http_response: json object containing the active orders and their items and addons, and an http "OK"
     """
     print("Fetch Active Orders Call")
     
-    query = "SELECT * FROM Orders WHERE active = True"
+    #tables to access: Orders, Order_Items, Order_Addons, Items, Addons, Stores
+    #methods to access: transaction calculation
+    
+    select =        "SELECT Orders.id AS Orders, Item.title AS Item, Addon.title AS Addon "
+    int =           "FROM (Orders "
+    inner_join1 =   "INNER JOIN Order_Items ON Orders.id = Order_Items.order_id) "
+    inner_join2 =   "INNER JOIN Item ON Item.id = Order_Items.item_id "
+    join1 =         "LEFT JOIN Order_Addons ON Order_Addons.order_id = Orders.id "
+    join2 =         "LEFT JOIN Addon ON Order_Addons.addon_id = Addon.id "
+    where =         "WHERE Orders.active = 1 "
+    rest =          "ORDER BY Orders.id, Item.id ASC;"
+    query = select + int + inner_join1 + inner_join2 + join1 + join2 + where + rest
     ret = {}
     
-    ords = query_sql(query).fetchall()
-    for order in ords:
-        ord_id = order[0] #fetch order ID
-        query = "SELECT * FROM Order_Items WHERE order_id = " + str(ord_id)
-        items = query_sql(query).fetchall() #grab associated items
-        query = "SELECT * FROM Order_Addons WHERE order_id = " + str(ord_id)
-        addons = query_sql(query).fetchall() #grab associated addons
-        ret.update({ord_id:[order,items,addons]}) #pack into dictionary {"ID":[ [order] , [ [item] , [item] , etc ] , [ [ addon ] , [ addon ] , etc ] ] , "ID2":[etc] }
-
+    ret = query_sql(query).fetchall()
+    print(ret)
     return make_response(jsonify(ret), "200")
 
 @app.route("/database/methods/rm_order/<ID>", methods=['GET'])

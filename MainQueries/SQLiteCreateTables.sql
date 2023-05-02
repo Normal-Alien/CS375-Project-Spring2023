@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS [Store](
 );
 CREATE TABLE IF NOT EXISTS [Item](
 	id int identity (1,1),
-	[name] text,
+	title text,
 	store_id int,
 	picture image,
 	cost float,
@@ -17,10 +17,11 @@ CREATE TABLE IF NOT EXISTS [Item](
 );
 CREATE TABLE IF NOT EXISTS [Addon](
 	id int identity(1,1),
-	store_id int,
+	title text,
+	item_id int,
 	cost float,
 	PRIMARY KEY (id),
-	FOREIGN KEY (store_id) REFERENCES Store(id)
+	FOREIGN KEY (item_id) REFERENCES Item(id)
 );
 CREATE TABLE IF NOT EXISTS [Orders](
 	id int identity(1,1),
