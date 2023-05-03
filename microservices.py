@@ -205,7 +205,23 @@ def fetch_active_orders():
     join2 =         "LEFT JOIN Addon ON Order_Addons.addon_id = Addon.id "
     where =         "WHERE Orders.active = 1 "
     rest =          "ORDER BY Orders.id, Item.id ASC;"
-    #query2 = "SELECT Order_Items.order_id, Item.name AS ItemName, Addon.name AS AddonName FROM Addon INNER JOIN Order_Addons ON Addon.id = Order_Addons.addon_id RIGHT OUTER JOIN Item INNER JOIN Order_Items ON Item.id = dbo.Order_Items.item_id ON Order_Addons.item_id = Order_Items.item_id AND Order_Addons.order_id = Order_Items.order_id ORDER BY Orders.id, Addon.id"
+    #query2 = "SELECT Order_Items.order_id, Item.title AS ItemName, Addon.title AS AddonName, Orders.active FROM Orders INNER JOIN Item INNER JOIN Order_Items ON Item.id = Order_Items.item_id ON Orders.id = Order_Items.order_id LEFT OUTER JOIN Addon INNER JOIN Order_Addons ON Addon.id = Order_Addons.addon_id ON Order_Items.item_id = Order_Addons.item_id AND Order_Items.order_id = Order_Addons.order_id WHERE Orders.active = 1 ORDER BY Orders.id;"
+    """
+
+    SELECT Order_Items.order_id AS ID, Item.title AS ItemName, Addon.title AS AddonName, Orders.active
+        FROM Orders INNER JOIN
+            Item INNER JOIN
+                Order_Items 
+                ON Item.id = Order_Items.item_id 
+                ON Orders.id = Order_Items.order_id LEFT OUTER JOIN
+            Addon INNER JOIN
+                Order_Addons 
+                ON Addon.id = Order_Addons.addon_id 
+                ON Order_Items.item_id = Order_Addons.item_id 
+            AND Order_Items.order_id = Order_Addons.order_id
+        WHERE Orders.active = 1
+        ORDER BY Orders.id;
+    """
     query = select + int + inner_join1 + inner_join2 + join1 + join2 + where + rest
     ret = {}
     
