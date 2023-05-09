@@ -174,8 +174,7 @@ def fetch_active_orders():
     and then returns the active orders and their items and addons
     
     Final output:
-    {[Order_ID:[
-            ###Stores:[store_id,store_id,etc.] ###probably not gonna be used
+    {Order_ID:[
             [Item_ID:
                 Addon_ID:[addon name]
                 Addon_ID_2:[addon name]
@@ -186,16 +185,13 @@ def fetch_active_orders():
             ]
         ]
     Order_ID_2:etc.
-    ]}
+    }
     Compressed: {[Order_ID:[Cost:price,Stores:[store_id,store_id,etc.],[Item_ID:[Addon_ID:addon name,Addon_ID_2:addon name,etc.],Item_ID_2:[Addon_ID:addon name],etc.]],Order_ID_2:etc.]}
 
     Returns:
         http_response: json object containing the active orders and their items and addons, and an http "OK"
     """
     print("Fetch Active Orders Call")
-    
-    #tables to access: Orders, Order_Items, Order_Addons, Items, Addons, Stores
-    #methods to access: transaction calculation
     
     select =        "SELECT Orders.id AS Orders, Item.title AS Item, Addon.title AS Addon "
     int =           "FROM (Orders "
@@ -205,28 +201,44 @@ def fetch_active_orders():
     join2 =         "LEFT JOIN Addon ON Order_Addons.addon_id = Addon.id "
     where =         "WHERE Orders.active = 1 "
     rest =          "ORDER BY Orders.id, Item.id ASC;"
-    #query2 = "SELECT Order_Items.order_id, Item.title AS ItemName, Addon.title AS AddonName, Orders.active FROM Orders INNER JOIN Item INNER JOIN Order_Items ON Item.id = Order_Items.item_id ON Orders.id = Order_Items.order_id LEFT OUTER JOIN Addon INNER JOIN Order_Addons ON Addon.id = Order_Addons.addon_id ON Order_Items.item_id = Order_Addons.item_id AND Order_Items.order_id = Order_Addons.order_id WHERE Orders.active = 1 ORDER BY Orders.id;"
-    """
-
-    SELECT Order_Items.order_id AS ID, Item.title AS ItemName, Addon.title AS AddonName, Orders.active
-        FROM Orders INNER JOIN
-            Item INNER JOIN
-                Order_Items 
-                ON Item.id = Order_Items.item_id 
-                ON Orders.id = Order_Items.order_id LEFT OUTER JOIN
-            Addon INNER JOIN
-                Order_Addons 
-                ON Addon.id = Order_Addons.addon_id 
-                ON Order_Items.item_id = Order_Addons.item_id 
-            AND Order_Items.order_id = Order_Addons.order_id
-        WHERE Orders.active = 1
-        ORDER BY Orders.id;
-    """
     query = select + int + inner_join1 + inner_join2 + join1 + join2 + where + rest
     ret = {}
     
     ret = query_sql(query).fetchall()
-    print(ret)
+    """
+    Unfinished better version
+    ret = {}
+    query = "SELECT id FROM Orders WHERE Orders.active = 1"
+    orders = [] #array of order ids
+    items = []
+    addons = []
+    id_list = query_sql(query).fetchall()
+    for id in id_list:
+        orders.append(id[0])
+    query2 = "SELECT order_id, item_id FROM Order_Items WHERE Order_Items.order_id = "
+    query3 = "SELECT item_id, addon_id FROM Order_Addons WHERE Order_Addons.order_id = "
+    for id in orders:
+        query = query2 + str(id)
+        items.append(query_sql(query).fetchall())
+    for id in orders:
+        query = query3 + str(id)
+        addons.append(query_sql(query).fetchall())
+    print(orders)
+    print(items)
+    print(addons)
+    for order in orders:
+        iquery = "SELECT title FROM Item WHERE Item.id = "
+        aquery = "SELECT title FROM Addon WHERE Addon.id = "
+        reli = [s for s in items if s[0] == order]
+        if len(addons) > 0:
+            rela = [s for s in addons if s[0] == order]
+            for addon in rela:
+                query = aquery + str(addon[2])
+                adn_name = query_sql(query).fetchall()
+        for item in reli:
+            query = iquery + str(item[1])
+            itm_name = query_sql(query).fetchall()
+    """
     return make_response(jsonify(ret), "200")
 
 @app.route("/database/methods/rm_order/<ID>", methods=['GET'])
