@@ -25,7 +25,10 @@ import org.json.simple.parser.ParseException;
  */
 public class MenuNav {
     private Boolean isLive = false;
-    private String ip = "172.25.42.120:8080";
+    private String ip = "172.25.38.184:8080";
+    private Boolean mapVer = false;
+    private String sampleMap = "{\"0\":[[0,100.0,50.0,1],[[0,0],[0,1]],[[0,0,1],[0,1,0]]],\"1\":[[1,75.0,70.0,1],[],[]]}";
+    private String sampleArray = "[[0, 100.0, 50.0,1], [1, 75.0, 70.0,1], [2, 50.0, 30.0,0]]";
     private ClientCook client = new ClientCook();
     private Stage stage;
 	private Scene scene;
@@ -37,20 +40,27 @@ public class MenuNav {
             //clear from orderItems
             //clear from orders
             
-            //testing JSON library
-            JSONObject obj = new JSONObject();
             String id = source.getText();
-            id = id.split(" ")[0];
+            if(mapVer){
+               //id = id.split(" ")[0]; 
+            }
+            else{
+                //removes the starting opening bracket, then gets the first element
+                //assumes the first element of the array is the id 
+                //(not not an array containing the id)
+                id = id.split("\\[")[1];
+                id = id.split(",")[0];
+            }
+            
             //obj.put("ID", id);
             
             
-            System.out.println(id);
+            System.out.println("removing order: " + id);
             orderBox.getChildren().remove(source);
-            //likely need to change url
             if(isLive){
                 
                String ret = removeOrder(id);
-                
+               System.out.println("microservice call returned: " + ret);
             }
             
         }
@@ -66,7 +76,7 @@ public class MenuNav {
             return ret;
         }
 	private String getOrders(){
-            String ret = "empty";
+            String ret = "no return recieved";
             try{
                 String cmdURL = "http://" + ip + "/database/methods/fetch_active_orders";
                 System.out.println(cmdURL);
@@ -83,85 +93,45 @@ public class MenuNav {
 		System.out.println("refreshing...");
                 orderBox.getChildren().clear();
                 JSONParser parser = new JSONParser();
+                String data = "";
                 if(isLive){
                     
 
                     //get list of active orders from the database
                     String response = getOrders();
-                    if(response.equals("empty")){
+                    if(response.equals("no return recieved")){
                         System.out.println(response);
                     }
                     else{
-                        System.out.println("tryed a response, got it");
-                        //if(!(response.isSuccessful())) throw new IOException("Request failure.\nFailed code: " + response);
-                        System.out.println("response successful...");
+                        System.out.println("response successful... ");
                         
-                        String data = response;
+                        data = response;
                         System.out.println(data);
-                        System.out.println(data);
-                        JSONObject obj = (JSONObject) JSONValue.parse(data);
-                        ContainerFactory containerFactory = new ContainerFactory() {
-                        @Override
-                        public Map createObjectContainer() {
-                           return new LinkedHashMap<>();
-                        }
-                        @Override
-                        public List creatArrayContainer() {
-                           return new LinkedList<>();
-                        }
-                        };
-                        try {
-                            Map map = (Map)parser.parse(data, containerFactory);       
-                            Set<String> keySet = map.keySet();
-                            String[] keys = new String[keySet.size()];
-                            keySet.toArray(keys);
-                            
-                            for(int i = 0; i < keys.length; i++){
-                                String key = keys[i];
-                                //in future would parse to get string labels,
-                                //currently just int ids
-                                String label = key + " " + map.get(keys[i]);
-                                javafx.scene.control.Button button = new javafx.scene.control.Button(label);
-                                button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
-                                orderBox.getChildren().add(button);
-                                
-                            }
-                        } catch(ParseException pe) {
-                            System.out.println("position: " + pe.getPosition());
-                            System.out.println(pe);
-                        }
-                        
                     }
                 }
-                    /*
-                    catch(Exception e){
-                        System.out.println(e);
-                    }
-                    */
-                
-                
                 else{
                     
-                //temp dummy buttons
-                String data = "{\"0\":[[0,100.0,50.0,1],[[0,0],[0,1]],[[0,0,1],[0,1,0]]],\"1\":[[1,75.0,70.0,1],[],[]]}";
-               
-                    JSONObject obj = (JSONObject) JSONValue.parse(data);
-                        ContainerFactory containerFactory = new ContainerFactory() {
-                        @Override
-                        public Map createObjectContainer() {
-                           return new LinkedHashMap<>();
-                        }
-                        @Override
-                        public List creatArrayContainer() {
-                           return new LinkedList<>();
-                        }
-                        };
-                        try {
+                //create buttons using sample data
+                
+                }
+                    try {
+                        if(mapVer){
+                            data = sampleMap;
+                            ContainerFactory containerFactory = new ContainerFactory() {
+                                @Override
+                                public Map createObjectContainer() {
+                                    return new LinkedHashMap<>();
+                                }
+                                @Override
+                                public List creatArrayContainer() {
+                                   return new LinkedList<>();
+                                }
+                            };
                             Map map = (Map)parser.parse(data, containerFactory);       
                             Set<String> keySet = map.keySet();
                             String[] keys = new String[keySet.size()];
                             keySet.toArray(keys);
-                            
+
                             for(int i = 0; i < keys.length; i++){
                                 String key = keys[i];
                                 //in future would parse to get string labels,
@@ -170,24 +140,23 @@ public class MenuNav {
                                 javafx.scene.control.Button button = new javafx.scene.control.Button(label);
                                 button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
                                 orderBox.getChildren().add(button);
-                                
                             }
-                        } catch(ParseException pe) {
-                            System.out.println("position: " + pe.getPosition());
-                            System.out.println(pe);
                         }
-                }
-                /*
-                root = FXMLLoader.load(getClass().getResource("CookuiV0.1.fxml"));
-		
-		stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-		
-		scene = new Scene(root);
-		stage.setScene(scene);
-		stage.show();
-                */
-                //String name = event.getSource().toString();
-                //System.out.println(name);
+                        else{
+                            data = sampleArray;                        
+                            Object obj = JSONValue.parse(data);       
+                            JSONArray arr = (JSONArray) obj;
+                            for(int i = 0; i < arr.size(); i++){
+                                String label = arr.get(i).toString();
+                                javafx.scene.control.Button button = new javafx.scene.control.Button(label);
+                                button.setOnAction(orderPress -> remove((javafx.scene.control.Button) orderPress.getSource()));
+                                orderBox.getChildren().add(button);
+                            }
+                        }
+                    } catch(ParseException pe) {
+                        System.out.println("idx: " + pe.getPosition());
+                        System.out.println(pe);
+                    }
                 System.out.println("refreshed!");
 	}
 }
